@@ -27,7 +27,12 @@ class Distribution(ABC):
 
 
 class UniformDistribution(Distribution):
-    def __init__(self, min_, max_):
+    def __init__(self, min_: float, max_: float):
+        """
+        Construct an uniform distribution - [min,max]
+        :param min_: minimum value of the distribution
+        :param max_: maximum value of the distribution
+        """
         self.min = min_
         self.max = max_
 
@@ -38,7 +43,12 @@ class UniformDistribution(Distribution):
 
 
 class NormalDistribution(Distribution):
-    def __init__(self, mean, std):
+    def __init__(self, mean: float, std: float):
+        """
+        Construct a normal distribution-N(mean, std^2)
+        :param mean: Mean of the distribution
+        :param std: standard deviation of the distribution
+        """
         self.mean = mean
         self.std = std
 
