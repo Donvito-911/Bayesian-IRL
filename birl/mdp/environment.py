@@ -18,11 +18,3 @@ class Environment(ABC, MDP):
     @abstractmethod
     def get_actions(self, state):
         pass
-
-
-class GridWorld:
-    """
-    GridWorld Environment
-    """
-    def __init__(self):
-        pass
