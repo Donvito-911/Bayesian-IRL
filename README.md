@@ -6,4 +6,4 @@ Implementation of Bayesian Inverse Reinforcement Learning by D. Ramachandran & E
 - Gridworld
 
 ## Examples
-- In folder examples, you can find examples of environments and policy_walk algorithm.
+- In folder examples, you can find examples of environments, policy walk algorithm and distributions.
