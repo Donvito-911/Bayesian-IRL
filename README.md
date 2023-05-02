@@ -6,4 +6,4 @@ Implementation of Bayesian Inverse Reinforcement Learning by D. Ramachandran & E
 - Gridworld
 
 ## Examples
-- In notebook main.ipynb are examples of using MDP and Environments such as Gridworld.
+- In folder examples, you can find examples of environments and policy_walk algorithm.
