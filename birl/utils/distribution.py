@@ -27,7 +27,7 @@ class Distribution(ABC):
 
 
 class UniformDistribution(Distribution):
-    def __init__(self, min_: float, max_: float):
+    def __init__(self, min_: float = 0, max_: float = 1):
         """
         Construct an uniform distribution - [min,max]
         :param min_: minimum value of the distribution
@@ -42,8 +42,8 @@ class UniformDistribution(Distribution):
         return ss.uniform(**params)
 
 
-class NormalDistribution(Distribution):
-    def __init__(self, mean: float, std: float):
+class GaussianDistribution(Distribution):
+    def __init__(self, mean: float = 0, std: float = 1):
         """
         Construct a normal distribution-N(mean, std^2)
         :param mean: Mean of the distribution
@@ -53,6 +53,38 @@ class NormalDistribution(Distribution):
         self.std = std
 
     @property
-    def distribution(self):
+    def distribution(self) -> 'scipy distribution':
         params = {"loc": self.mean, "scale": self.std}
         return ss.norm(**params)
+
+
+class LaplaceDistribution(Distribution):
+    def __init__(self, mean: float = 0, std: float = 1):
+        """
+        Construct a laplace distribution-N(mean, std^2)
+        :param mean: Mean of the distribution
+        :param std: standard deviation of the distribution
+        """
+        self.mean = mean
+        self.std = std
+
+    @property
+    def distribution(self) -> 'scipy distribution':
+        params = {"loc": self.mean, "scale": self.std}
+        return ss.laplace(**params)
+
+
+class BetaDistribution(Distribution):
+    def __init__(self, alpha: float = 0.5, beta: float = 0.5):
+        """
+        Construct a Beta distribution with alpha/beta values
+        :param alpha: shape parameter
+        :param beta: shape parameter
+        """
+        self.alpha = alpha
+        self.beta = beta
+
+    @property
+    def distribution(self) -> 'scipy distribution':
+        params = {"a": self.alpha, "b": self.beta}
+        return ss.beta(**params)
