@@ -1,7 +1,8 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
 
-class MDP:
+class MDP(ABC):
     """
     The Markov Decision Process as a 4-tuple (S, A, T, gamma) where
     S is a set of finite states.
@@ -9,7 +10,7 @@ class MDP:
     T is a transition probability function (matrix) of the form T: S x A x S -> [0,1]
     gamma is the discount factor in the range  [0,1).
 
-    This is an API for manipulating the MDP of an Environment (such as GridWorld). But it can be instantiated to see
+    This is an API for manipulating the MDP of an environment (such as GridWorld). But it can be instantiated to see
     the dynamics of any MDP as previously described. Nevertheless, this MDP is not sufficient to work with the BIRL
     algorithm policy_walk (it uses an Environment, which has more methods than an MDP).
     """
@@ -80,14 +81,6 @@ class MDP:
             s, a, s_ = self.states[s], self.actions[a], self.states[s_]
             self.t_probabilities[s, a, s_] = prob
 
-    def __is_valid_sas(self, s, a, s_):
-        if s not in self.states:
-            raise Exception(f'The state {s} was not found in states: {set(self.states.keys())}')
-        if a is not None and a not in self.actions:
-            raise Exception(f'The action {a} was not found in actions: {set(self.actions.keys())}')
-        if s_ is not None and s_ not in self.states:
-            raise Exception(f'The state {s_} was not found in states: {set(self.states.keys())}')
-
     def set_transition_probabilities(self, lst: list[tuple['state', 'action', 'state', float]]) -> None:
         """
         set the transition probabilities of a given list of transition probabilities of the form
@@ -96,18 +89,8 @@ class MDP:
         :param lst: list with transition probabilities
         :return: None
         """
-
         for s, a, s_, prob in lst:
             self.set_transition_probability(prob, s, a, s_)
-
-    def generate_random_transition_probabilities(self) -> None:
-        """
-        Generate random transition probability for all the state-action-state_
-        :return: None
-        """
-        for s in range(self.n_states):
-            for a in range(self.n_actions):
-                self.t_probabilities[s, a] = self.__generate_random_vector(self.n_states)
 
     def reset_transitions(self):
         """
@@ -125,11 +108,27 @@ class MDP:
         """
         return rewards[self.states[s]]
 
-    @staticmethod
-    def __generate_random_vector(size: int):
+    def __is_valid_sas(self, s, a, s_):
+        if s not in self.states:
+            raise Exception(f'The state {s} was not found in states: {set(self.states.keys())}')
+        if a is not None and a not in self.actions:
+            raise Exception(f'The action {a} was not found in actions: {set(self.actions.keys())}')
+        if s_ is not None and s_ not in self.states:
+            raise Exception(f'The state {s_} was not found in states: {set(self.states.keys())}')
+
+    @abstractmethod
+    def iterstates(self) -> 'iterator | list | iterable':
         """
-        get a random vector that sums up to 1
-        :param size: size of the vector
-        :return: a vector of size 'size' when sum of the vector equals 1 and each element >=0
+        iterate over non-terminal states.
+        This should work
         """
-        return np.random.dirichlet(np.ones(size))
+
+    @abstractmethod
+    def iteractions(self, state) -> 'iterator | list | iterable':
+        """
+        iterate over possible actions for a given state
+        :param state: the state to explore possible actions
+        :return:
+        """
+        pass
+

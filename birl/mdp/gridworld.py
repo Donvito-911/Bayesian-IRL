@@ -1,8 +1,8 @@
-from .environment import Environment
+from .mdp import MDP
 import numpy as np
 
 
-class GridWorld(Environment):
+class GridWorld(MDP):
     """
     GridWorld Environment
     """
@@ -42,13 +42,13 @@ class GridWorld(Environment):
             self.set_transition_probability(0, terminal_state)
             self.set_transition_probability(1, terminal_state, "out", terminal_state)
 
-    def iterstates(self, include_terminals: bool = False):
+    def iterstates(self):
         """
         iterate over non-terminal and non-blocking states
         """
         for r in range(self.dimensions[0]):
             for c in range(self.dimensions[1]):
-                if (r, c) not in self.traps and ((r, c) not in self.terminals or include_terminals):
+                if (r, c) not in self.traps and (r, c) not in self.terminals:
                     yield r, c
 
     def iteractions(self, state: tuple):
