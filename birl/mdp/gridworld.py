@@ -52,7 +52,7 @@ class GridWorld(Environment):
                 if (r, c) not in self.traps and ((r, c) not in self.terminals or include_terminals):
                     yield r, c
 
-    def __iteractions(self, state: tuple):
+    def iteractions(self, state: tuple):
         """
         iterate the possible actions that can be taken in a state (ignore the actions that are not plausible, such as
         going out of bounds or going to an obstacle)
@@ -82,7 +82,7 @@ class GridWorld(Environment):
         :return:
         """
         for state in self.iterstates():
-            for action in self.__iteractions(state):
+            for action in self.iteractions(state):
                 transition_probs = self.__generate_transition_prob(state, action)
                 self.set_transition_probabilities(transition_probs)
 

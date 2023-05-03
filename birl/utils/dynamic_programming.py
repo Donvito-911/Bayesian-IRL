@@ -37,12 +37,16 @@ class DP:
         policy_stable = True
         for state in self.mdp.iterstates():
             old_action = policy[state]
-            policy[state] = None  # TODO implementar
+            policy[state] = None  # TODO implementar argmax
             if old_action != policy[state]:
                 policy_stable = False
         return policy_stable
 
     def compute_v_s(self, state, policy):
+        # TODO: implement a function in MDP that returns T_probabilities for
+        #       - given state
+        #       - given state-action
+        #       - given state-action-state
         p_state, p_policy = self.mdp.states[state], self.mdp.actions[policy[state]]
         sum_ = np.sum(self.mdp.t_probabilities[p_state, p_policy, :] * self.values)
         return self.rewards[p_state] + self.mdp.gamma * sum_
