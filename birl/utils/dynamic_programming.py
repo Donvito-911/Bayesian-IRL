@@ -43,10 +43,7 @@ class DP:
         return policy_stable
 
     def compute_v_s(self, state, policy):
-        # TODO: implement a function in MDP that returns T_probabilities for
-        #       - given state
-        #       - given state-action
-        #       - given state-action-state
-        p_state, p_policy = self.mdp.states[state], self.mdp.actions[policy[state]]
-        sum_ = np.sum(self.mdp.t_probabilities[p_state, p_policy, :] * self.values)
-        return self.rewards[p_state] + self.mdp.gamma * sum_
+        # transition probabilities of state-action (the size are states)
+        t_probs_s_a = self.mdp.get_transition_prob(state, policy[state])
+        sum_ = np.sum(t_probs_s_a * self.values)  # sum of T(s,a, s_) x V(s_) for each s_
+        return self.mdp.get_reward(self.rewards, state) + self.mdp.gamma * sum_

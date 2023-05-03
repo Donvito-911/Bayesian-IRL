@@ -27,7 +27,7 @@ class GridWorld(Environment):
             self.traps.add(trap_state)
 
         # reset transitions
-        self.t_probabilities = np.zeros(self.t_probabilities.shape)
+        self.reset_transitions()  # set to 0 all probs
         self.__init_transition_probabilities()
 
     def set_terminals(self, terminals: list[tuple]) -> None:
@@ -39,9 +39,8 @@ class GridWorld(Environment):
         for terminal_state in terminals:
             self.terminals.add(terminal_state)
             # update transitions of terminal state
-            pointer_terminal_state, pointer_out = self.states[terminal_state], self.actions["out"]
-            self.t_probabilities[pointer_terminal_state, :, :] = 0
-            self.t_probabilities[pointer_terminal_state, pointer_out, pointer_terminal_state] = 1
+            self.set_transition_probability(0, terminal_state)
+            self.set_transition_probability(1, terminal_state, "out", terminal_state)
 
     def iterstates(self, include_terminals: bool = False):
         """
@@ -105,7 +104,7 @@ class GridWorld(Environment):
 
     def __get_next_state(self, state: tuple, action: str) -> tuple:
         """
-        get the new state when an action is executed in a given state (without noise). If the state is not
+        get the new state when an action is executed in a given state (deterministic). If the state is not
         reachable, the new state is actually the old state.
         :param state: the initial state
         :param action: the action taken in the initial state

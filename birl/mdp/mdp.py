@@ -29,18 +29,35 @@ class MDP:
         # the probability transitions are initialized in 0
         self.t_probabilities = np.zeros((self.n_states, self.n_actions, self.n_states))
 
-    def get_transition_probability(self, s, a, s_) -> float:
+    def get_transition_prob(self, s, a=None, s_=None) -> 'float | np.array':
         """
         get the transition probability of reaching a state 's_' when the action 'a' was taken in state 's'
+        If s_ is none then it returns an array with all the transition probabilities states
+        for a state 's' and an action 'a'.
+        If a_ is none then it returns an array with all the transition probabilities for each action from state s to
+        state s_
+        If a_ and s_ are None, it returns a matrix transition probabilities for each action and each state of a given
+        state 's'.
         :param s: initial state
         :param a: action taken in initial state
         :param s_: destiny state
-        :return: probability in range [0,1]
+        :return: probability in range [0,1] or array with transition probabilities
         """
-        s, a, s_ = self.__get_t_pos(s, a, s_)  # get the pointers of s, a, and s_
+        self.__is_valid_sas(s, a, s_)
+        if a is None and s_ is None:
+            s = self.states[s]  # get the pointer/index in transition matrix
+            return self.t_probabilities[s, :, :]
+        elif s_ is None:
+            s, a = self.states[s], self.actions[a]
+            return self.t_probabilities[s, a, :]
+        elif a is None:
+            s, s_ = self.states[s], self.states[s_]
+            return self.t_probabilities[s, :, s_]
+
+        s, a, s_ = self.states[s], self.actions[a], self.states[s_]
         return self.t_probabilities[s, a, s_]
 
-    def set_transition_probability(self, s: 'state', a: 'action', s_: 'state', prob: float):
+    def set_transition_probability(self, prob: float, s: 'state', a: 'action' = None, s_: 'state' = None):
         """
         Set the transition probability for a state 's' with an action 'a' and reaching state 's_'
         :param s: initial state
@@ -49,8 +66,27 @@ class MDP:
         :param prob: probability of t(s, a, s_) in range [0,1]
         :return: None
         """
-        s, a, s_ = self.__get_t_pos(s, a, s_)  # get the pointers of s, a, and s_
-        self.t_probabilities[s, a, s_] = prob
+        self.__is_valid_sas(s, a, s_)
+        if a is None and s_ is None:
+            s = self.states[s]  # get the pointer/index in transition matrix
+            self.t_probabilities[s, :, :] = prob
+        elif s_ is None:
+            s, a = self.states[s], self.actions[a]
+            self.t_probabilities[s, a, :] = prob
+        elif a is None:
+            s, s_ = self.states[s], self.states[s_]
+            self.t_probabilities[s, :, s_] = prob
+        else:
+            s, a, s_ = self.states[s], self.actions[a], self.states[s_]
+            self.t_probabilities[s, a, s_] = prob
+
+    def __is_valid_sas(self, s, a, s_):
+        if s not in self.states:
+            raise Exception(f'The state {s} was not found in states: {set(self.states.keys())}')
+        if a is not None and a not in self.actions:
+            raise Exception(f'The action {a} was not found in actions: {set(self.actions.keys())}')
+        if s_ is not None and s_ not in self.states:
+            raise Exception(f'The state {s_} was not found in states: {set(self.states.keys())}')
 
     def set_transition_probabilities(self, lst: list[tuple['state', 'action', 'state', float]]) -> None:
         """
@@ -60,8 +96,9 @@ class MDP:
         :param lst: list with transition probabilities
         :return: None
         """
+
         for s, a, s_, prob in lst:
-            self.set_transition_probability(s, a, s_, prob)
+            self.set_transition_probability(prob, s, a, s_)
 
     def generate_random_transition_probabilities(self) -> None:
         """
@@ -72,34 +109,21 @@ class MDP:
             for a in range(self.n_actions):
                 self.t_probabilities[s, a] = self.__generate_random_vector(self.n_states)
 
-    def __get_t_pos(self, s, a, s_) -> list['pointer_state', 'pointer_action', 'pointer_state']:
+    def reset_transitions(self):
         """
-        Get the pointers of states s, s_ and action, so it can be referenced in probability transition matrix
-        :param s: state s
-        :param a: action taken in state s
-        :param s_: state s_
-        :return: pointers referenced in transition matrix of s, a, s_
-
-        Example:
-        if states are ['A', 'B', 'C'] and actions are ['a1', 'a2']. Then calling __get_t_pos('A', 'a1', 'B') will return
-         [0, 0, 1] because 'A' => 0, 'B' => 1, 'C' => 2 and 'a1' => 0, 'a2' => 1.
-        This is useful because the transition probabilities is a matrix, so you need the respective mapping to get
-        the probability transition.
-
-        Under the hood, calling the get_transition_probability('A', 'a1', 'B') just
-        returns the value at the matrix of the transition probabilities in position [0, 0, 1].
+        reset the transition probabilities to 0.
+        :return:
         """
-        t_positions = []
-        for name in [s, a, s_]:
-            if name in self.states:
-                t_positions.append(self.states[name])
-            elif name in self.actions:
-                t_positions.append(self.actions[name])
-            else:
-                raise Exception(f'The name {name} was not found in states {self.states.keys()} or actions '
-                                f'{self.actions.keys()}')
+        self.t_probabilities = np.zeros(self.t_probabilities.shape)
 
-        return t_positions
+    def get_reward(self, rewards: np.array, s):
+        """
+        Given an external array of rewards R of size |S|, get the reward of specific state
+        :param rewards: array of floats R
+        :param s: state
+        :return: R(s)
+        """
+        return rewards[self.states[s]]
 
     @staticmethod
     def __generate_random_vector(size: int):
