@@ -6,7 +6,7 @@ class GridWorld(Environment):
     """
     GridWorld Environment
     """
-    def __init__(self, dims: tuple, noise: float = 0.2):
+    def __init__(self, dims: tuple, gamma: float = 0.9, noise: float = 0.2):
         self.board = np.full(dims, ' ', dtype=object)
         self.noise = noise
         self.dimensions = dims
@@ -14,7 +14,7 @@ class GridWorld(Environment):
         self.traps = set()
         actions = ["up", "down", "left", "right", "out"]
         states = [(r, c) for r in range(self.dimensions[0]) for c in range(self.dimensions[1])]
-        super().__init__(states, actions)  # create the MDP with transition probabilities to 0
+        super().__init__(states, actions, gamma=gamma)  # create the MDP with transition probabilities to 0
         self.__init_transition_probabilities()
 
     def set_traps(self, traps: list[tuple]) -> None:
@@ -43,13 +43,13 @@ class GridWorld(Environment):
             self.t_probabilities[pointer_terminal_state, :, :] = 0
             self.t_probabilities[pointer_terminal_state, pointer_out, pointer_terminal_state] = 1
 
-    def __iterstates(self):
+    def iterstates(self, include_terminals: bool = False):
         """
         iterate over non-terminal and non-blocking states
         """
         for r in range(self.dimensions[0]):
             for c in range(self.dimensions[1]):
-                if (r, c) not in self.traps and (r, c) not in self.terminals:
+                if (r, c) not in self.traps and ((r, c) not in self.terminals or include_terminals):
                     yield r, c
 
     def __iteractions(self, state: tuple):
@@ -81,7 +81,7 @@ class GridWorld(Environment):
         Initialize the transition probabilities of the MDP given the dynamics of the environment.
         :return:
         """
-        for state in self.__iterstates():
+        for state in self.iterstates():
             for action in self.__iteractions(state):
                 transition_probs = self.__generate_transition_prob(state, action)
                 self.set_transition_probabilities(transition_probs)
