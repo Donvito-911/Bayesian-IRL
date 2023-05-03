@@ -11,10 +11,10 @@ class Environment(ABC, MDP):
     for a given state s, etc. All of those are modeled and set in its MDP, no need to set manually as if you were
     instantiating directly an MDP
     """
-    @abstractmethod
-    def iterstates(self):
-        pass
+    # @abstractmethod
+    # def iterstates(self):
+    #     pass
 
-    @abstractmethod
-    def get_actions(self, state):
-        pass
+    # @abstractmethod
+    # def get_actions(self, state):
+    #     pass
