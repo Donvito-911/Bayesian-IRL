@@ -48,7 +48,7 @@ class GridWorld(MDP):
         """
         for r in range(self.dimensions[0]):
             for c in range(self.dimensions[1]):
-                if (r, c) not in self.traps and (r, c) not in self.terminals:
+                if (r, c) not in self.traps:
                     yield r, c
 
     def iteractions(self, state: tuple):

@@ -24,13 +24,14 @@ class DP:
                 break
         return policy
 
-    def policy_evaluation(self, policy, threshold: float = 1e-4):
+    def policy_evaluation(self, policy, threshold: float = 1e-3):
         while True:
             delta = 0
             for state in self.mdp.iterstates():
-                v = self.values[state]
-                self.values[state] = self.__compute_v_s(state, policy)
-                delta = max(delta, abs(v - self.values[state]))
+                p_state = self.mdp.states[state]
+                v = self.values[p_state]
+                self.values[p_state] = self.compute_q_s(state, policy[state])
+                delta = max(delta, abs(v - self.values[p_state]))
             if delta < threshold:
                 break
 
@@ -38,16 +39,25 @@ class DP:
         policy_stable = True
         for state in self.mdp.iterstates():
             old_action = policy[state]
-            policy[state] = None  # TODO implementar argmax
+            policy[state] = self.argmax(state)  
             if old_action != policy[state]:
                 policy_stable = False
         return policy_stable
 
-    def review_q(self, rewards: np.array, policy: dict) -> bool:
-        pass
+    def argmax(self, state):
+        argmax_, maxq = "", -np.inf
+        for a in self.mdp.iteractions(state): 
+           q = self.compute_q_s(state, a)
+           if q > maxq: 
+               argmax_, maxq = a, q 
 
-    def __compute_v_s(self, state: dict, policy: dict) -> 'V(s)':
-        # transition probabilities of state-action (the size are states)
-        t_probs_s_a = self.mdp.get_transition_prob(state, policy[state])
+        return argmax_
+
+    def compute_q_s(self, state, action):
+        t_probs_s_a = self.mdp.get_transition_prob(state, action)
         sum_ = np.sum(t_probs_s_a * self.values)  # sum of T(s,a, s_) x V(s_) for each s_
         return self.mdp.get_reward(self.rewards, state) + self.mdp.gamma * sum_
+
+
+    def review_q(self, rewards: np.array, policy: dict) -> bool:
+        pass
